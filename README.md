@@ -1,75 +1,169 @@
-Prime Properties - Full-Stack Real Estate Management System
-This project is a comprehensive real-stack application developed during the PG-DAC course at IACSD Pune. It is designed to streamline property listings, user authentication, and appointment scheduling between buyers and sellers.
+🏠 Prime Properties – Real Estate Management Web Application
 
-🚀 Project Overview
-The system provides a platform for managing real estate transactions, featuring a secure backend built with Spring Boot and a dynamic, responsive frontend developed using React.js.
+Prime Properties is a full-stack real estate management web application that allows users to list, explore, buy, and rent properties. It is built using a modern RESTful architecture with Spring Boot powering the backend, React.js handling the frontend, and MySQL serving as the relational database.
 
-Key Features
-Secure Authentication: Implements JWT-based security with role-based access control (Admin, Seller, Buyer).
+The project reflects real-world application development practices, focusing on clean architecture, secure JWT-based authentication, and seamless frontend–backend integration.
 
-Property Management: Allows sellers to add, edit, and manage property listings with detailed descriptions.
+🚀 Features
 
-Appointment Scheduling: Enables buyers to book and manage appointments for property visits.
-
-Password Management: Includes secure "Forgot Password" and "Change Password" workflows with token-based verification.
-
-User Dashboard: Personalized views for users to track their activities and properties.
+👤 User Registration & Authentication (JWT-based)
+🔐 Secure Login & Role-based Authorization (Admin / Seller / Customer)
+🏘️ Add, Update, and Manage Property Listings (Seller)
+🔎 Browse and Explore Properties (Customer)
+💰 Buy or Rent Properties through the Platform
+📅 Book Property Visit Appointments
+📋 Manage Bookings and Appointments
+🖼️ Property Image Upload & Management
+💳 Online Payment Integration for Property Booking
+📊 Admin Analytics Dashboard for Platform Monitoring
+🔑 Forgot Password & Change Password with Token Verification
+🧑 Personalized User Dashboards
+📡 RESTful API Integration with Frontend
 
 🛠️ Tech Stack
 Backend
-Framework: Spring Boot 3.2.0
 
-Language: Java 17
+Java 17
 
-Security: Spring Security & JSON Web Token (JWT)
+Spring Boot 3.2
 
-Database: MySQL with Spring Data JPA
+Spring MVC
 
-API Documentation: SpringDoc OpenAPI (Swagger)
+Spring Data JPA (Hibernate)
 
-Utilities: ModelMapper for DTO mapping and Lombok for boilerplate reduction
+Spring Security
+
+JWT Authentication
+
+RESTful APIs
+
+ModelMapper
+
+Lombok
+
+MySQL
 
 Frontend
-Library: React.js
 
-Routing: React Router for navigation and protected routes
+React.js
 
-State Management: Hooks-based architecture (useState, useEffect)
+React Router (Protected Routes)
 
-Styling: Custom CSS for a professional UI
+Axios
 
-📂 Project Structure
-springboot_backend_template/: Contains the Maven-based Java backend.
+Hooks-based State Management
 
-src/: Contains the React.js source code including components, pages, and services.
+Custom CSS (Light-Themed UI)
 
-pom.xml: Manages backend dependencies and build configurations.
+HTML5 / CSS3 / JavaScript (ES6)
 
-🔧 Installation & Setup
-Prerequisites
-Java Development Kit (JDK) 17
+Database
 
-Node.js and npm
+MySQL
 
-MySQL Server
+Tools & IDE
 
-Maven
+IntelliJ / Eclipse
 
-Backend Setup
-Configure your database credentials in springboot_backend_template/src/main/resources/application.properties.
+Postman (API Testing)
 
-Navigate to the backend directory and run:
+Swagger (API Documentation)
 
-Bash
+Git & GitHub
+
+🧩 Architecture & Design
+
+Layered Architecture
+Controller → Service → Repository
+
+DTO Pattern for Data Transfer
+
+JWT-based Stateless Authentication
+
+Role-based Authorization (Admin / Seller / Customer)
+
+Centralized Exception Handling
+
+Proper Entity Relationships
+
+User ↔ Property ↔ Appointment ↔ Booking ↔ Payment ↔ Query
+
+CORS Configuration for Frontend Integration
+
+📂 Project Structure (Backend)
+com.primeproperties
+├── controller
+├── service
+├── repository
+├── entities
+├── dto
+├── security (JWT, Filters, Config)
+└── exceptions
+
+🔐 Authentication Flow
+
+User registers → Role assigned (Customer / Seller)
+User logs in → JWT token generated
+Token stored in frontend (localStorage)
+JWT attached to protected API requests
+Spring Security validates token on each request
+
+⚙️ REST API Highlights
+Method	Endpoint	Description
+POST	/api/auth/register	User Registration
+POST	/api/auth/login	User Login
+GET	/api/properties	Fetch All Properties
+GET	/api/properties/{id}	Fetch Property Details
+POST	/api/seller/property	Add Property (Seller)
+PUT	/api/seller/property/{id}	Update Property
+POST	/api/appointments/{propertyId}	Book Appointment
+POST	/api/bookings/{propertyId}	Buy / Rent Property
+POST	/api/payment	Process Online Payment
+GET	/api/admin/dashboard	Admin Analytics Data
+🎯 Purpose of the Project
+
+This project was developed as part of the PG-DAC curriculum at IACSD, Pune to demonstrate:
+
+Full-stack Web Development
+
+REST API Design using Spring Boot
+
+Secure Authentication with Spring Security & JWT
+
+Frontend Integration with React.js
+
+Database Modeling & ORM with Hibernate
+
+Clean Code and Scalable Architecture
+
+🖥️ Screenshots
+
+(Will be added soon)
+
+🚀 How to Run Locally
+Backend
+
+Configure database credentials in:
+springboot_backend_template/src/main/resources/application.properties
+
+Run:
+
 mvn clean install
 mvn spring-boot:run
-Frontend Setup
-Navigate to the root directory and install dependencies:
 
-Bash
+Frontend
 npm install
-Start the development server:
-
-Bash
 npm run dev
-Developed by Rishi Dusane 2021 Mechanical Engineering Graduate | PG-DAC Aspirant at IACSD Pune
+
+📌 Future Enhancements
+
+📧 Email Notifications for Bookings & Appointments
+🔍 Advanced Property Search with Smart Filters
+📍 Location-based Property Recommendations
+📱 Progressive Web App (PWA) Version
+
+👨‍💻 Developer
+
+Rishi Dusane
+Mechanical Engineering Graduate (2021)
+PG-DAC Student – IACSD, Pune
