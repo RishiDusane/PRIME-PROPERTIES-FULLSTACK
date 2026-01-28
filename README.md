@@ -2,17 +2,17 @@
 
 Prime Properties is a full-stack real estate management web application that allows users to list, explore, buy, and rent properties. It is built using a modern RESTful architecture with Spring Boot powering the backend, React.js handling the frontend, and MySQL serving as the relational database.
 
-The project reflects real-world application development practices, focusing on clean architecture, secure JWT-based authentication, and seamless frontend–backend integration.
+The project is designed to reflect real-world application development practices, focusing on clean code structure, scalable architecture, and secure JWT-based authentication.
 
 🚀 Features
 
 👤 User Registration & Authentication (JWT-based)
 🔐 Secure Login & Role-based Authorization (Admin / Seller / Customer)
 🏘️ Add, Update, and Manage Property Listings (Seller)
-🔎 Browse and Explore Properties (Customer)
+🌐 Browse and Explore Properties (Customer)
 💰 Buy or Rent Properties through the Platform
 📅 Book Property Visit Appointments
-📋 Manage Bookings and Appointments
+📋 Manage Bookings & Appointments
 🖼️ Property Image Upload & Management
 💳 Online Payment Integration for Property Booking
 📊 Admin Analytics Dashboard for Platform Monitoring
@@ -23,72 +23,72 @@ The project reflects real-world application development practices, focusing on c
 🛠️ Tech Stack
 Backend
 
-Java 17
+☕ Java 17
 
-Spring Boot 3.2
+🍃 Spring Boot 3.2
 
-Spring MVC
+🌐 Spring MVC
 
-Spring Data JPA (Hibernate)
+🗄️ Spring Data JPA (Hibernate)
 
-Spring Security
+🔐 Spring Security
 
-JWT Authentication
+🪙 JWT Authentication
 
-RESTful APIs
+🔄 RESTful APIs
 
-ModelMapper
+🧩 ModelMapper
 
-Lombok
+✂️ Lombok
 
-MySQL
+🐬 MySQL
 
 Frontend
 
-React.js
+⚛️ React.js
 
-React Router (Protected Routes)
+🧭 React Router (Protected Routes)
 
-Axios
+📡 Axios
 
-Hooks-based State Management
+🪝 Hooks-based State Management
 
-Custom CSS (Light-Themed UI)
+🎨 Custom CSS (Light-Themed UI)
 
-HTML5 / CSS3 / JavaScript (ES6)
+💻 HTML5 / CSS3 / JavaScript (ES6)
 
 Database
 
-MySQL
+🐬 MySQL
 
 Tools & IDE
 
-IntelliJ / Eclipse
+🧠 IntelliJ / Eclipse
 
-Postman (API Testing)
+📮 Postman (API Testing)
 
-Swagger (API Documentation)
+📑 Swagger (API Documentation)
 
-Git & GitHub
+🗃️ Git & GitHub
 
 🧩 Architecture & Design
 
-Layered Architecture
+🏗️ Layered Architecture
 Controller → Service → Repository
 
-DTO Pattern for Data Transfer
+📦 DTO Pattern for Data Transfer
 
-JWT-based Stateless Authentication
+🔐 JWT-based Stateless Authentication
 
-Role-based Authorization (Admin / Seller / Customer)
+🧑‍🤝‍🧑 Role-based Authorization (Admin / Seller / Customer)
 
-Centralized Exception Handling
+⚠️ Centralized Exception Handling
 
-Proper Entity Relationships
+🔗 Proper Entity Relationships
 
 User ↔ Property ↔ Appointment ↔ Booking ↔ Payment ↔ Query
 
-CORS Configuration for Frontend Integration
+🌍 CORS Configuration for Frontend Integration
 
 📂 Project Structure (Backend)
 com.primeproperties
@@ -102,11 +102,11 @@ com.primeproperties
 
 🔐 Authentication Flow
 
-User registers → Role assigned (Customer / Seller)
-User logs in → JWT token generated
-Token stored in frontend (localStorage)
-JWT attached to protected API requests
-Spring Security validates token on each request
+📝 User registers → Role assigned (Customer / Seller)
+🔓 User logs in → JWT token generated
+💾 Token stored in frontend (localStorage)
+📤 JWT attached to protected API requests
+✅ Spring Security validates token on each request
 
 ⚙️ REST API Highlights
 Method	Endpoint	Description
@@ -124,26 +124,26 @@ GET	/api/admin/dashboard	Admin Analytics Data
 
 This project was developed as part of the PG-DAC curriculum at IACSD, Pune to demonstrate:
 
-Full-stack Web Development
+💻 Full-stack Web Development
 
-REST API Design using Spring Boot
+🌐 REST API Design using Spring Boot
 
-Secure Authentication with Spring Security & JWT
+🔐 Secure Authentication with Spring Security & JWT
 
-Frontend Integration with React.js
+⚛️ Frontend Integration with React.js
 
-Database Modeling & ORM with Hibernate
+🗄️ Database Modeling & ORM with Hibernate
 
-Clean Code and Scalable Architecture
+🧼 Clean Code and Scalable Architecture
 
 🖥️ Screenshots
 
-(Will be added soon)
+(Will be updated soon)
 
 🚀 How to Run Locally
 Backend
 
-Configure database credentials in:
+⚙️ Configure database credentials in:
 springboot_backend_template/src/main/resources/application.properties
 
 Run:
@@ -158,7 +158,7 @@ npm run dev
 📌 Future Enhancements
 
 📧 Email Notifications for Bookings & Appointments
-🔍 Advanced Property Search with Smart Filters
+🔍 Advanced Property Search & Smart Filters
 📍 Location-based Property Recommendations
 📱 Progressive Web App (PWA) Version
 
@@ -166,4 +166,4 @@ npm run dev
 
 Rishi Dusane
 Mechanical Engineering Graduate (2021)
-PG-DAC Student – IACSD, Pune
+PG-DAC Graduate (2026) – IACSD, Pune
