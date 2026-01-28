@@ -7,17 +7,29 @@ The project is designed to reflect real-world application development practices,
 🚀 Features
 
 👤 User Registration & Authentication (JWT-based)
+
 🔐 Secure Login & Role-based Authorization (Admin / Seller / Customer)
+
 🏘️ Add, Update, and Manage Property Listings (Seller)
+
 🌐 Browse and Explore Properties (Customer)
+
 💰 Buy or Rent Properties through the Platform
+
 📅 Book Property Visit Appointments
+
 📋 Manage Bookings & Appointments
+
 🖼️ Property Image Upload & Management
+
 💳 Online Payment Integration for Property Booking
+
 📊 Admin Analytics Dashboard for Platform Monitoring
+
 🔑 Forgot Password & Change Password with Token Verification
+
 🧑 Personalized User Dashboards
+
 📡 RESTful API Integration with Frontend
 
 🛠️ Tech Stack
@@ -84,43 +96,29 @@ Controller → Service → Repository
 
 ⚠️ Centralized Exception Handling
 
-🔗 Proper Entity Relationships
+Entity Relationships
 
 User ↔ Property ↔ Appointment ↔ Booking ↔ Payment ↔ Query
 
 🌍 CORS Configuration for Frontend Integration
 
-📂 Project Structure (Backend)
-com.primeproperties
-├── controller
-├── service
-├── repository
-├── entities
-├── dto
-├── security (JWT, Filters, Config)
-└── exceptions
+<img width="926" height="506" alt="image" src="https://github.com/user-attachments/assets/c22ff423-2542-4eb7-bf68-6acb25f4c2ee" />
+
 
 🔐 Authentication Flow
 
 📝 User registers → Role assigned (Customer / Seller)
+
 🔓 User logs in → JWT token generated
+
 💾 Token stored in frontend (localStorage)
+
 📤 JWT attached to protected API requests
+
 ✅ Spring Security validates token on each request
 
-⚙️ REST API Highlights
-Method	Endpoint	Description
-POST	/api/auth/register	User Registration
-POST	/api/auth/login	User Login
-GET	/api/properties	Fetch All Properties
-GET	/api/properties/{id}	Fetch Property Details
-POST	/api/seller/property	Add Property (Seller)
-PUT	/api/seller/property/{id}	Update Property
-POST	/api/appointments/{propertyId}	Book Appointment
-POST	/api/bookings/{propertyId}	Buy / Rent Property
-POST	/api/payment	Process Online Payment
-GET	/api/admin/dashboard	Admin Analytics Data
-🎯 Purpose of the Project
+<img width="1070" height="747" alt="image" src="https://github.com/user-attachments/assets/90e57585-30aa-4bbf-91d5-ffee5fe87748" />
+
 
 This project was developed as part of the PG-DAC curriculum at IACSD, Pune to demonstrate:
 
@@ -143,8 +141,10 @@ This project was developed as part of the PG-DAC curriculum at IACSD, Pune to de
 🚀 How to Run Locally
 Backend
 
-⚙️ Configure database credentials in:
+Configure database credentials in:
+
 springboot_backend_template/src/main/resources/application.properties
+
 
 Run:
 
@@ -158,8 +158,11 @@ npm run dev
 📌 Future Enhancements
 
 📧 Email Notifications for Bookings & Appointments
+
 🔍 Advanced Property Search & Smart Filters
+
 📍 Location-based Property Recommendations
+
 📱 Progressive Web App (PWA) Version
 
 👨‍💻 Developer
