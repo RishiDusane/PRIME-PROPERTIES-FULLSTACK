@@ -136,7 +136,17 @@ This project was developed as part of the PG-DAC curriculum at IACSD, Pune to de
 
 🖥️ Screenshots
 
-(Will be updated soon)
+<img width="1920" height="1080" alt="Home" src="https://github.com/user-attachments/assets/cd83e1f6-fd45-4d08-b2fa-ae7ac188f971" />
+<img width="1920" height="1080" alt="Login" src="https://github.com/user-attachments/assets/6db78b9e-9be3-492a-aea1-76d800a3a00e" />
+<img width="1920" height="1080" alt="SignUp" src="https://github.com/user-attachments/assets/06aae3d4-d482-49b8-8e83-ac2e1d810ad6" />
+<img width="1920" height="1080" alt="PropertyDetails" src="https://github.com/user-attachments/assets/a07f2c19-c3ad-43fc-9a46-4bfda330dd9b" />
+<img width="1920" height="1080" alt="PropertyViewCustomer" src="https://github.com/user-attachments/assets/0ab5a274-0e83-4898-ba03-b918cd406b90" />
+<img width="1920" height="1080" alt="Appointments" src="https://github.com/user-attachments/assets/6ef56ac4-0b79-4cf8-9c16-93de7661dc76" />
+<img width="1920" height="1080" alt="CustomerQuery" src="https://github.com/user-attachments/assets/a54b47ec-769c-4707-9439-7b5c6ef2f157" />
+<img width="1920" height="1080" alt="AdminDashboard" src="https://github.com/user-attachments/assets/c52d754a-5663-47e6-ba87-bf1b0b4cd040" />
+<img width="1920" height="1080" alt="AdminSupportDesk" src="https://github.com/user-attachments/assets/5a67e035-0a3f-40f0-8501-441c6f25df5a" />
+<img width="1920" height="1080" alt="ChangePassword" src="https://github.com/user-attachments/assets/f9dd174c-dce5-4ad0-afa8-d1c8ee6c1106" />
+
 
 🚀 How to Run Locally
 Backend
