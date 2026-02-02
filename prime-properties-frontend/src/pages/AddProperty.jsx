@@ -1,60 +1,78 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 export default function AddProperty() {
-  const nav = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({ title: "", description: "", price: "", location: "", imageUrl: "" });
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    price: "",
+    location: "",
+    imageUrl: "",
+  });
+  const [currentUser, setCurrentUser] = useState(null);
+  const navigate = useNavigate();
 
-  const submit = async e => {
+  useEffect(() => {
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      setCurrentUser(JSON.parse(userStr));
+    } else {
+      toast.error("Please login first");
+      navigate("/login");
+    }
+  }, [navigate]);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     try {
-      await api.post("/properties", { ...form, price: Number(form.price) });
-      toast.success("Property listed successfully!");
-      nav("/");
+      // We pass the email as a query param because the backend PropertyService 
+      // uses it to find the owner entity.
+      await api.post(`/properties?email=${currentUser.email}`, formData);
+      toast.success("Property added successfully!");
+      navigate("/properties");
     } catch (err) {
-      toast.error(err?.response?.data || "Failed to add property");
-    } finally {
-      setLoading(false);
+      toast.error(err.response?.data?.message || "Failed to add property");
     }
   };
 
   return (
-    <div className="auth-container">
-      <form onSubmit={submit} className="form-card" style={{ maxWidth: '720px' }}>
-        <h2 className="form-title">List Your Property</h2>
-
-        <div className="form-group">
-          <label>Property Title</label>
-          <input value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="e.g. Modern Apartment" required />
-        </div>
-
-        <div className="grid" style={{ gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-          <div className="form-group">
-            <label>Price (₹)</label>
-            <input type="number" value={form.price} onChange={e => setForm({...form, price: e.target.value})} required />
+    <div className="container mt-5">
+      <div className="row justify-content-center">
+        <div className="col-md-6">
+          <div className="card shadow border-0 p-4">
+            <h2 className="text-center mb-4 fw-bold">List New Property</h2>
+            <form onSubmit={handleSubmit}>
+              <div className="mb-3">
+                <label className="form-label">Property Title</label>
+                <input name="title" className="form-control" placeholder="e.g. Luxury 2BHK Apartment" onChange={handleChange} required />
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Location</label>
+                <input name="location" className="form-control" placeholder="City, Area" onChange={handleChange} required />
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Price (₹)</label>
+                <input name="price" type="number" className="form-control" onChange={handleChange} required />
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Image URL</label>
+                <input name="imageUrl" className="form-control" placeholder="https://..." onChange={handleChange} />
+              </div>
+              <div className="mb-4">
+                <label className="form-label">Description</label>
+                <textarea name="description" className="form-control" rows="3" onChange={handleChange} required></textarea>
+              </div>
+              <button type="submit" className="btn btn-primary w-100 py-2 fw-bold">Submit Listing</button>
+            </form>
           </div>
-          <div className="form-group">
-            <label>Location</label>
-            <input value={form.location} onChange={e => setForm({...form, location: e.target.value})} placeholder="City, Area" required />
-          </div>
         </div>
-
-        <div className="form-group">
-          <label>Description</label>
-          <textarea rows="4" value={form.description} onChange={e => setForm({...form, description: e.target.value})} placeholder="Tell us about the property..." required />
-        </div>
-
-        <div className="form-group">
-          <label>Image URL</label>
-          <input value={form.imageUrl} onChange={e => setForm({...form, imageUrl: e.target.value})} placeholder="https://..." required />
-        </div>
-
-        <button type="submit" disabled={loading}>{loading ? "Publishing..." : "Publish Listing"}</button>
-      </form>
+      </div>
     </div>
   );
 }

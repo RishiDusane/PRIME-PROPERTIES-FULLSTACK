@@ -3,110 +3,197 @@ import api from "../services/api";
 import toast from "react-hot-toast";
 
 export default function Appointments() {
-  const [list, setList] = useState([]);
+  const [appointments, setAppointments] = useState([]);
+  const [bookings, setBookings] = useState([]);
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [payingId, setPayingId] = useState(null);
 
   useEffect(() => {
-    const u = localStorage.getItem("user");
-    if(u) setUser(JSON.parse(u));
-    load(); 
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      try {
+        setUser(JSON.parse(userStr));
+      } catch {}
+    }
+    fetchAppointments();
+    fetchBookings();
   }, []);
 
-  const load = async () => {
+  const fetchAppointments = async () => {
     try {
       const res = await api.get("/appointments");
-      setList(res.data);
-    } catch (err) {
-      toast.error("Could not load appointments");
+      setAppointments(res.data || []);
+    } catch {
+      toast.error("Failed to load appointments");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Cancel / Delete
-  const handleCancel = async (id) => {
-    if(!window.confirm("Cancel this appointment?")) return;
+  const fetchBookings = async () => {
     try {
-      await api.delete(`/appointments/${id}`);
-      toast.success("Appointment cancelled");
-      setList(list.filter(a => a.id !== id));
-    } catch (err) {
-      toast.error("Failed to cancel");
+      const res = await api.get("/bookings");
+      setBookings(res.data || []);
+    } catch {
+      setBookings([]);
     }
   };
 
-  // Update Status (Approve/Reject)
-  const handleStatus = async (id, status) => {
+  const hasBookingForAppointment = (appointmentId) =>
+    bookings.some((b) => b.appointmentId === appointmentId);
+
+  const handlePay = async (appointmentId) => {
+    setPayingId(appointmentId);
     try {
-      const res = await api.put(`/appointments/${id}`, { status });
-      // Update local state to reflect change immediately
-      setList(list.map(a => a.id === id ? { ...a, status: res.data.status } : a));
+      const bookRes = await api.post("/bookings", { appointmentId });
+      const bookingId = bookRes.data.id;
+      await api.post("/payments", { bookingId });
+      toast.success("Payment successful!");
+      fetchBookings();
+      fetchAppointments();
+    } catch (err) {
+      const msg = err?.response?.data?.message || err?.response?.data;
+      toast.error(typeof msg === "string" ? msg : "Payment failed");
+    } finally {
+      setPayingId(null);
+    }
+  };
+
+  const updateStatus = async (id, status) => {
+    try {
+      await api.put(`/appointments/${id}`, { status });
       toast.success(`Appointment ${status.toLowerCase()}`);
+      fetchAppointments();
     } catch (err) {
-      toast.error("Failed to update status");
+      const msg = err?.response?.data?.message || err?.response?.data;
+      toast.error(typeof msg === "string" ? msg : "Update failed");
     }
   };
 
   return (
-    <div>
-      <div className="page-header">
-        <h2>My Appointments</h2>
-        <p>Manage your visits and requests</p>
+    <div className="space-y-8">
+      {/* Header */}
+      <div>
+        <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+          Appointments
+        </h2>
+        <p className="text-slate-500 mt-1">
+          View and manage property visits and bookings.
+        </p>
       </div>
 
-      {list.length === 0 ? (
-        <div className="center small-muted">No appointments found.</div>
-      ) : (
-        <div className="grid">
-          {list.map(a => {
-            // Determine badge color
-            let badgeClass = "badge badge-pending";
-            if(a.status === 'APPROVED') badgeClass = "badge badge-approved";
-            if(a.status === 'REJECTED') badgeClass = "badge badge-rejected";
+      {/* Loading */}
+      {loading && (
+        <div className="bg-white border border-slate-200 rounded-2xl p-10 text-center text-slate-500">
+          Loading appointments...
+        </div>
+      )}
 
-            return (
-              <div key={a.id} className="card small">
-                <div style={{display:'flex', justifyContent:'space-between', alignItems:'start'}}>
-                  <h4 style={{margin:0}}>{a.propertyTitle}</h4>
-                  <span className={badgeClass}>{a.status}</span>
-                </div>
-                
-                <p className="small-muted" style={{margin:'0.5rem 0'}}>
-                  📅 {a.date} &nbsp; ⏰ {a.time}
-                </p>
+      {/* Empty State */}
+      {!loading && appointments.length === 0 && (
+        <div className="bg-white border border-dashed border-slate-300 rounded-2xl p-12 text-center text-slate-500">
+          No appointments yet.
+        </div>
+      )}
 
-                {/* BUTTONS */}
-                <div style={{marginTop:'auto', paddingTop:'0.5rem', borderTop:'1px solid rgba(255,255,255,0.05)', display:'flex', gap:'0.5rem'}}>
-                  
-                  {/* CUSTOMER ACTION: CANCEL */}
-                  {user && user.role === 'CUSTOMER' && (
-                    <button 
-                      onClick={() => handleCancel(a.id)}
-                      style={{fontSize:'.85rem', padding:'.4rem', background:'#ef4444', width:'100%'}}
-                    >
-                      Cancel Booking
-                    </button>
-                  )}
+      {/* Table */}
+      {!loading && appointments.length > 0 && (
+        <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-slate-900 text-white text-xs uppercase tracking-wider">
+                <tr>
+                  <th className="px-6 py-4">Property</th>
+                  <th className="px-6 py-4">Customer</th>
+                  <th className="px-6 py-4">Date</th>
+                  <th className="px-6 py-4">Time</th>
+                  <th className="px-6 py-4">Status</th>
+                  {user?.role === "CUSTOMER" && <th className="px-6 py-4">Payment</th>}
+                  {user?.role !== "CUSTOMER" && <th className="px-6 py-4">Actions</th>}
+                </tr>
+              </thead>
 
-                  {/* OWNER ACTIONS: APPROVE / REJECT */}
-                  {user && user.role === 'OWNER' && a.status === 'PENDING' && (
-                    <>
-                      <button 
-                        onClick={() => handleStatus(a.id, "APPROVED")}
-                        style={{fontSize:'.85rem', padding:'.4rem', background:'var(--success)', flex:1}}
+              <tbody className="divide-y divide-slate-100">
+                {appointments.map((a) => (
+                  <tr key={a.id} className="hover:bg-slate-50 transition">
+                    <td className="px-6 py-4 font-semibold text-slate-900">
+                      {a.propertyTitle}
+                    </td>
+
+                    <td className="px-6 py-4 text-slate-600">
+                      {a.customerName ?? "—"}
+                    </td>
+
+                    <td className="px-6 py-4 text-slate-600">
+                      {a.date}
+                    </td>
+
+                    <td className="px-6 py-4 text-slate-600">
+                      {typeof a.time === "string" ? a.time.slice(0, 5) : a.time}
+                    </td>
+
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-flex px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wide
+                          ${
+                            a.status === "APPROVED"
+                              ? "bg-emerald-100 text-emerald-700"
+                              : a.status === "PENDING"
+                              ? "bg-amber-100 text-amber-700"
+                              : "bg-red-100 text-red-700"
+                          }`}
                       >
-                        Approve
-                      </button>
-                      <button 
-                        onClick={() => handleStatus(a.id, "REJECTED")}
-                        style={{fontSize:'.85rem', padding:'.4rem', background:'var(--danger)', flex:1}}
-                      >
-                        Reject
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+                        {a.status}
+                      </span>
+                    </td>
+
+                    {/* CUSTOMER PAYMENT */}
+                    {user?.role === "CUSTOMER" && (
+                      <td className="px-6 py-4">
+                        {a.status === "APPROVED" &&
+                          (hasBookingForAppointment(a.id) ? (
+                            <span className="inline-flex px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
+                              Paid
+                            </span>
+                          ) : (
+                            <button
+                              onClick={() => handlePay(a.id)}
+                              disabled={payingId === a.id}
+                              className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl transition disabled:opacity-60"
+                            >
+                              {payingId === a.id ? "Processing..." : "Pay"}
+                            </button>
+                          ))}
+                      </td>
+                    )}
+
+                    {/* OWNER / ADMIN ACTIONS */}
+                    {user?.role !== "CUSTOMER" && (
+                      <td className="px-6 py-4">
+                        {a.status === "PENDING" && (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => updateStatus(a.id, "APPROVED")}
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => updateStatus(a.id, "REJECTED")}
+                              className="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1.5 rounded-lg transition"
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

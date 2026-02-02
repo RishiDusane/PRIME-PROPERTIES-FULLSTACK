@@ -1,7 +1,13 @@
 package com.exam.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,31 +18,20 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(length = 50, nullable = false)
+    
     private String name;
-
-    @Column(length = 50, unique = true, nullable = false)
+    
+    @Column(unique = true)
     private String email;
-
-    @Column(nullable = false)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private String password; 
-
+    
+    private String password;
+    
     @Enumerated(EnumType.STRING)
-    private Role role; 
-
-    @Column(name = "is_verified", nullable = false)
-    private boolean isVerified = false; 
-
-    public enum Role { OWNER, CUSTOMER, ADMIN }
+    private Role role;
     
-    // Helper for easier access in logic
-    public void setVerified(boolean verified) {
-        this.isVerified = verified;
-    }
-    
-    public boolean isVerified() {
-        return this.isVerified;
+    private boolean isVerified = false;
+
+    public enum Role {
+        CUSTOMER, OWNER, ADMIN
     }
 }

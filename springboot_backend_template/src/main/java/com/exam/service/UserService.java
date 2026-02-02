@@ -1,6 +1,9 @@
 package com.exam.service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +44,9 @@ public class UserService {
         if (dto == null) throw new IllegalArgumentException("User data is required");
         if (userRepo.findByEmail(dto.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
+        }
+        if (dto.getRole() == User.Role.ADMIN) {
+            throw new RuntimeException("Admin role cannot be self-assigned");
         }
         User user = mapper.map(dto, User.class);
         user.setPassword(encoder.encode(dto.getPassword()));
@@ -127,11 +133,22 @@ public class UserService {
         if (!user.isVerified()) throw new RuntimeException("Email not verified.");
         if (!encoder.matches(password, user.getPassword())) throw new RuntimeException("Invalid credentials");
 
-        String token = jwtUtils.generateToken(email);
+     // Example fix for the incompatible types error
+        String token = jwtUtils.generateTokenFromUsername(user.getEmail());
         UserDTO response = mapper.map(user, UserDTO.class);
         response.setPassword(null);
         response.setToken(token);
         return response;
+    }
+
+    public List<UserDTO> getAllUsersForAdmin() {
+        return userRepo.findAll().stream()
+                .map(u -> {
+                    UserDTO d = mapper.map(u, UserDTO.class);
+                    d.setPassword(null);
+                    return d;
+                })
+                .collect(Collectors.toList());
     }
 
     private void sendEmailIfPossible(String to, String subject, String body) {

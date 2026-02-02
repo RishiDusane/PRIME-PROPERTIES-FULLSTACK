@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
@@ -21,18 +20,17 @@ public class AppointmentDTO {
     @NotNull(message = "Appointment time is required")
     private LocalTime time;
 
-    @NotBlank(message = "Status is required")
     @Pattern(
         regexp = "PENDING|APPROVED|REJECTED",
         message = "Status must be PENDING, APPROVED, or REJECTED"
     )
-    private String status;
+    private String status; // Optional on create; required on update
 
     @NotNull(message = "Property ID is required")
     private Long propertyId;
 
-    @NotNull(message = "Customer ID is required")
-    private Long customerId;
+    private Long customerId; // Set server-side from principal on create
 
-    private String propertyTitle; // For UI only (no validation needed)
+    private String propertyTitle; // For UI only
+    private String customerName; // For UI only
 }

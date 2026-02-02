@@ -21,7 +21,9 @@ export default function Register() {
       toast.success("Registered — check mail (verify link).");
       nav("/login");
     } catch (err) {
-      toast.error(err?.response?.data || err.message);
+      const data = err?.response?.data;
+      const msg = typeof data === "string" ? data : data?.message || (data && typeof data === "object" ? Object.values(data).join(" ") : null) || err.message || "Registration failed";
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

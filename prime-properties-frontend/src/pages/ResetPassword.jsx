@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
 import toast from "react-hot-toast";
 
@@ -26,13 +26,18 @@ export default function ResetPassword() {
   };
 
   return (
-    <form onSubmit={submit} className="form-card">
-      <h2>Reset Password</h2>
-      <div className="form-group">
-        <label>New Password</label>
-        <input type="password" value={password} onChange={e => setPassword(e.target.value)} minLength={6} required />
-      </div>
-      <button type="submit" disabled={loading}>{loading ? "Resetting..." : "Reset Password"}</button>
-    </form>
+    <div className="auth-container">
+      <form onSubmit={submit} className="form-card">
+        <h2 className="form-title">Reset Password</h2>
+        <div className="form-group">
+          <label>New Password</label>
+          <input type="password" value={password} onChange={e => setPassword(e.target.value)} minLength={6} required />
+        </div>
+        <button type="submit" disabled={loading} className="submit-btn">{loading ? "Resetting..." : "Reset Password"}</button>
+        <p className="auth-footer">
+          <Link to="/login">Back to Login</Link>
+        </p>
+      </form>
+    </div>
   );
 }

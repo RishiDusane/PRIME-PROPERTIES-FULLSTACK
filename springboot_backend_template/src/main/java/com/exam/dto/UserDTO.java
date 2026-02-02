@@ -30,5 +30,7 @@ public class UserDTO {
     @NotNull(message = "Role is required")
     private Role role;
 
+    private Boolean verified; // For admin list; not required on register
+
     private String token; // Returned only during login
 }

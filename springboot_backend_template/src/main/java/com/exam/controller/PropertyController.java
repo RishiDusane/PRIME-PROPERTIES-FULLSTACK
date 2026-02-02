@@ -31,13 +31,10 @@ public class PropertyController {
     @Autowired private ModelMapper mapper;
 
     @GetMapping
-    public List<PropertyDTO> getAll() {
-        List<Property> props = propertyService.getAllProperties();
-        return props.stream().map(p -> {
-            PropertyDTO dto = mapper.map(p, PropertyDTO.class);
-            dto.setOwnerId(p.getOwner() != null ? p.getOwner().getId() : null);
-            return dto;
-        }).collect(Collectors.toList());
+    public ResponseEntity<List<PropertyDTO>> getAllProperties() {
+        // Corrected type from List<Property> to List<PropertyDTO>
+        List<PropertyDTO> properties = propertyService.getAllProperties(); 
+        return ResponseEntity.ok(properties);
     }
 
     @PostMapping
@@ -55,7 +52,7 @@ public class PropertyController {
     public ResponseEntity<PropertyDTO> getPropertyById(@PathVariable Long id) {
         Property p = propertyService.getPropertyById(id);
         PropertyDTO dto = mapper.map(p, PropertyDTO.class);
-        dto.setOwnerId(p.getOwner().getId());
+        dto.setOwnerId(p.getOwner() != null ? p.getOwner().getId() : null);
         return ResponseEntity.ok(dto);
     }
 

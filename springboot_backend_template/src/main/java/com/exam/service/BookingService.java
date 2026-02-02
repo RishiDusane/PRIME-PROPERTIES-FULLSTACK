@@ -1,0 +1,64 @@
+package com.exam.service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.exam.dto.BookingDTO;
+import com.exam.entity.Appointment;
+import com.exam.entity.Booking;
+import com.exam.entity.User;
+import com.exam.exception.ResourceNotFoundException;
+import com.exam.repository.AppointmentRepository;
+import com.exam.repository.BookingRepository;
+import com.exam.repository.UserRepository;
+
+@Service
+public class BookingService {
+
+    @Autowired private BookingRepository bookingRepo;
+    @Autowired private AppointmentRepository apptRepo;
+    @Autowired private UserRepository userRepo;
+
+    public BookingDTO createBooking(Long appointmentId, String customerEmail) {
+        User customer = userRepo.findByEmail(customerEmail).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        Appointment appt = apptRepo.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
+        if (!appt.getStatus().equals(Appointment.Status.APPROVED)) {
+            throw new RuntimeException("Only approved appointments can be converted to bookings");
+        }
+        if (!appt.getCustomer().getId().equals(customer.getId())) {
+            throw new RuntimeException("You can only create a booking for your own approved appointment");
+        }
+        if (bookingRepo.findByAppointment_Id(appointmentId).isPresent()) {
+            throw new RuntimeException("A booking already exists for this appointment");
+        }
+        Booking booking = new Booking();
+        booking.setAppointment(appt);
+        booking.setBookingDate(appt.getDate());
+        booking.setAmount(appt.getProperty().getPrice() * 0.1); // 10% advance or mock amount
+        booking.setStatus(Booking.BookingStatus.PENDING);
+        booking = bookingRepo.save(booking);
+        return toDTO(booking);
+    }
+
+    public List<BookingDTO> getMyBookings(String email) {
+        User user = userRepo.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return bookingRepo.findByAppointment_Customer_Id(user.getId()).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    private BookingDTO toDTO(Booking b) {
+        BookingDTO dto = new BookingDTO();
+        dto.setId(b.getId());
+        dto.setAppointmentId(b.getAppointment().getId());
+        dto.setBookingDate(b.getBookingDate());
+        dto.setAmount(b.getAmount());
+        dto.setStatus(b.getStatus().name());
+        dto.setPropertyTitle(b.getAppointment().getProperty().getTitle());
+        return dto;
+    }
+}

@@ -2,6 +2,7 @@ package com.exam.controller;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,19 +18,31 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.exam.dto.AppointmentDTO;
+import com.exam.dto.BookingDTO;
 import com.exam.entity.Appointment;
+import com.exam.entity.Payment;
 import com.exam.service.AppointmentService;
+import com.exam.service.BookingService;
+import com.exam.service.PaymentService;
 
 @RestController
 @RequestMapping("/api")
 @CrossOrigin
 public class WorkFlowController {
     @Autowired private AppointmentService apptService;
+    @Autowired private BookingService bookingService;
+    @Autowired private PaymentService paymentService;
     @Autowired private ModelMapper mapper;
 
     @PostMapping("/appointments")
-    public Appointment createAppointment(@RequestBody AppointmentDTO dto, Principal principal) {
-        return apptService.createAppointment(dto, principal.getName());
+    public ResponseEntity<AppointmentDTO> createAppointment(@RequestBody AppointmentDTO dto, Principal principal) {
+        Appointment appt = apptService.createAppointment(dto, principal.getName());
+        AppointmentDTO out = mapper.map(appt, AppointmentDTO.class);
+        out.setPropertyTitle(appt.getProperty().getTitle());
+        out.setCustomerId(appt.getCustomer().getId());
+        out.setPropertyId(appt.getProperty().getId());
+        out.setCustomerName(appt.getCustomer().getName());
+        return ResponseEntity.ok(out);
     }
 
     @GetMapping("/appointments")
@@ -61,5 +74,34 @@ public class WorkFlowController {
     public ResponseEntity<String> deleteAppointment(@PathVariable Long id, Principal principal) {
         apptService.deleteAppointment(id, principal.getName());
         return ResponseEntity.ok("Appointment deleted successfully");
+    }
+
+    @PostMapping("/bookings")
+    public ResponseEntity<BookingDTO> createBooking(@RequestBody Map<String, Long> body, Principal principal) {
+        Long appointmentId = body.get("appointmentId");
+        if (appointmentId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(bookingService.createBooking(appointmentId, principal.getName()));
+    }
+
+    @GetMapping("/bookings")
+    public ResponseEntity<List<BookingDTO>> getMyBookings(Principal principal) {
+        return ResponseEntity.ok(bookingService.getMyBookings(principal.getName()));
+    }
+
+    @PostMapping("/payments")
+    public ResponseEntity<Map<String, Object>> processPayment(@RequestBody Map<String, Long> body, Principal principal) {
+        Long bookingId = body.get("bookingId");
+        if (bookingId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        Payment payment = paymentService.processMockPayment(bookingId, principal.getName());
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "transactionId", payment.getTransactionId(),
+            "amount", payment.getAmount(),
+            "message", "Payment successful (mock)"
+        ));
     }
 }

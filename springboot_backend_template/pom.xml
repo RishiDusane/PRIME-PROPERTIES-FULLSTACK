@@ -18,8 +18,8 @@
 
 	<properties>
 		<java.version>17</java.version>
-		<!-- set a Lombok version that is compatible with modern JDKs -->
 		<lombok.version>1.18.30</lombok.version>
+		<jjwt.version>0.12.3</jjwt.version>
 	</properties>
 
 	<dependencies>
@@ -31,21 +31,22 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
+		
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
-			<version>0.11.5</version>
+			<version>${jjwt.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-impl</artifactId>
-			<version>0.11.5</version>
+			<version>${jjwt.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-jackson</artifactId>
-			<version>0.11.5</version>
+			<version>${jjwt.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 
@@ -77,7 +78,6 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- Lombok: keep as provided (IDE plugins still needed for IDE editing) -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -93,7 +93,7 @@
 		<dependency>
 			<groupId>org.modelmapper</groupId>
 			<artifactId>modelmapper</artifactId>
-			<version>3.2.5</version>
+			<version>3.2.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springdoc</groupId>
@@ -104,14 +104,12 @@
 
 	<build>
 		<plugins>
-			<!-- Compiler plugin with explicit version and release -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.11.0</version>
 				<configuration>
 					<release>${java.version}</release>
-					<!-- annotationProcessorPaths must include versions -->
 					<annotationProcessorPaths>
 						<path>
 							<groupId>org.projectlombok</groupId>
@@ -122,7 +120,6 @@
 				</configuration>
 			</plugin>
 
-			<!-- Spring Boot plugin (kept as in original) -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>

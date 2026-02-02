@@ -1,0 +1,15 @@
+# IDE / Workspace files
+.metadata/
+.vscode/
+.idea/
+
+# Node
+node_modules/
+dist/
+
+# Spring Boot
+target/
+*.log
+
+# Environment
+.env

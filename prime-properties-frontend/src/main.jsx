@@ -1,15 +1,16 @@
-import React from 'react'
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import App from './App'
-import './styles.css'
-import { Toaster } from 'react-hot-toast'
+import React from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import App from "./App";
 
-createRoot(document.getElementById('root')).render(
+/* ✅ IMPORTANT: LOAD BOTH */
+import "./index.css";   // Tailwind
+import "./styles.css";  // Your custom UI
+
+createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
       <App />
-      <Toaster position="top-right" />
     </BrowserRouter>
   </React.StrictMode>
-)
+);

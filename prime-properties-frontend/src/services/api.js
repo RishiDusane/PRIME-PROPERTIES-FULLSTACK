@@ -1,38 +1,59 @@
-import axios from "axios";
-import toast from "react-hot-toast";
+// import axios from 'axios';
+
+// const api = axios.create({
+//   baseURL: 'http://localhost:8080/api',
+// });
+
+// // Automatically add JWT token to every request
+// api.interceptors.request.use((config) => {
+//   const token = localStorage.getItem('token');
+//   if (token) {
+//     config.headers.Authorization = `Bearer ${token}`;
+//   }
+//   return config;
+// }, (error) => {
+//   return Promise.reject(error);
+// });
+
+// // Handle unauthorized errors globally
+// api.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     if (error.response && error.response.status === 401) {
+//       localStorage.removeItem('token');
+//       localStorage.removeItem('user');
+//       // Optional: window.location.href = '/login';
+//     }
+//     return Promise.reject(error);
+//   }
+// );
+
+// export default api;
+import axios from 'axios';
 
 const api = axios.create({
-  baseURL: "http://localhost:8080/api",
-  headers: { "Content-Type": "application/json" }
+  baseURL: import.meta.env.DEV ? "/api" : "http://localhost:8080/api",
 });
 
-// attach token if present and looks valid
-api.interceptors.request.use(config => {
-  try {
-    const token = localStorage.getItem("token");
-    if (token && token !== "undefined" && token !== "null" && token.trim() !== "") {
-      config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      if (config.headers && config.headers.Authorization) delete config.headers.Authorization;
-    }
-  } catch (e) {
-    if (config.headers && config.headers.Authorization) delete config.headers.Authorization;
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
-}, error => Promise.reject(error));
+});
 
 api.interceptors.response.use(
-  res => res,
-  err => {
-    if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      if (window.location.pathname !== "/login") {
-        toast.error("Session expired or unauthorized. Please login.");
+      if (!window.location.pathname.startsWith("/login") && !window.location.pathname.startsWith("/register")) {
         window.location.href = "/login";
       }
     }
-    return Promise.reject(err);
+    return Promise.reject(error);
   }
 );
 

@@ -27,7 +27,11 @@ public class AppointmentService {
         User customer = userRepo.findByEmail(customerEmail).orElseThrow();
         Property property = propRepo.findById(dto.getPropertyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Property not found"));
-        
+
+        if (apptRepo.findByProperty_IdAndDateAndTime(property.getId(), dto.getDate(), dto.getTime()).isPresent()) {
+            throw new RuntimeException("This time slot is already booked for the selected property. Please choose another date or time.");
+        }
+
         Appointment appt = new Appointment();
         appt.setDate(dto.getDate());
         appt.setTime(dto.getTime());
@@ -40,10 +44,12 @@ public class AppointmentService {
     public List<AppointmentDTO> getMyAppointments(String email) {
         User user = userRepo.findByEmail(email).orElseThrow();
         List<Appointment> list;
-        if(user.getRole() == User.Role.OWNER) {
-            list = apptRepo.findByPropertyOwnerId(user.getId());
+        if (user.getRole() == User.Role.ADMIN) {
+            list = apptRepo.findAll();
+        } else if (user.getRole() == User.Role.OWNER) {
+            list = apptRepo.findByProperty_Owner_Id(user.getId());
         } else {
-            list = apptRepo.findByCustomerId(user.getId());
+            list = apptRepo.findByCustomer_Id(user.getId());
         }
         return list.stream().map(this::convertToDTO).collect(Collectors.toList());
     }
@@ -93,9 +99,9 @@ public class AppointmentService {
     private AppointmentDTO convertToDTO(Appointment a) {
         AppointmentDTO d = mapper.map(a, AppointmentDTO.class);
         d.setPropertyTitle(a.getProperty().getTitle());
-        // Manually set IDs to ensure they are returned
         d.setCustomerId(a.getCustomer().getId());
         d.setPropertyId(a.getProperty().getId());
+        d.setCustomerName(a.getCustomer().getName());
         return d;
     }
 }
