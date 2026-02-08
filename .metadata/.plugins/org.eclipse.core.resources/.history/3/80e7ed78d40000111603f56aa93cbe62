@@ -1,5 +1,0 @@
-package com.exam.entity;
-
-public enum BookingStatus {
-
-}

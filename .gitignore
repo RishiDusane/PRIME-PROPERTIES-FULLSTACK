@@ -1,0 +1,22 @@
+# Eclipse
+.metadata/
+.classpath
+.project
+.settings/
+
+# Java / Spring Boot
+target/
+*.log
+*.class
+
+# Node
+node_modules/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
