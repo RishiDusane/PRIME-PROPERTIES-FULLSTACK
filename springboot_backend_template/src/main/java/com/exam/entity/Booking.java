@@ -19,7 +19,8 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "bookings")
-@Getter @Setter
+@Getter
+@Setter
 public class Booking {
 
     @Id
@@ -35,12 +36,10 @@ public class Booking {
 
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Booking status is required")
-    private BookingStatus status; // PENDING, CONFIRMED
+    private BookingStatus status;
 
     @OneToOne
     @JoinColumn(name = "appointment_id", nullable = false)
     @NotNull(message = "Appointment is required for a booking")
     private Appointment appointment;
-
-    public enum BookingStatus { PENDING, CONFIRMED }
 }

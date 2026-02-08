@@ -1,0 +1,134 @@
+package com.exam.service;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+
+
+@Service
+@Transactional
+public class UserService {
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
+
+    @Autowired private UserRepository userRepo;
+    @Autowired private PasswordEncoder encoder;
+    @Autowired private ModelMapper mapper;
+    @Autowired private JwtUtils jwtUtils;
+    @Autowired(required = false) private JavaMailSender mailSender; 
+    @Autowired private VerificationTokenRepository verificationTokenRepo;
+    @Autowired private PasswordResetTokenRepository passwordResetTokenRepo;
+
+    private static final int VERIFICATION_TOKEN_MIN = 60 * 24; 
+    private static final int PASSWORD_RESET_TOKEN_MIN = 60; 
+
+    public String register(UserDTO dto) {
+        if (dto == null) throw new IllegalArgumentException("User data is required");
+        if (userRepo.findByEmail(dto.getEmail()).isPresent()) {
+            throw new RuntimeException("Email already exists");
+        }
+        if (dto.getRole() == Role.ADMIN) {
+            throw new RuntimeException("Admin role cannot be self-assigned");
+        }
+        User user = mapper.map(dto, User.class);
+        user.setPassword(encoder.encode(dto.getPassword()));
+        user.setVerified(false); 
+        userRepo.save(user);
+
+        VerificationToken vtoken = new VerificationToken(user, VERIFICATION_TOKEN_MIN);
+        verificationTokenRepo.save(vtoken);
+
+        String verifyLink = "http://localhost:5173/verify?token=" + vtoken.getToken();
+        String body = "Welcome! Please verify your email:\n" + verifyLink;
+        try {
+            sendEmailIfPossible(user.getEmail(), "Verify your email", body);
+        } catch (Exception e) {
+            log.warn("Failed to send verification email");
+        }
+        return "User registered. Verification email sent.";
+    }
+
+    public void verifyUser(String token) {
+        VerificationToken v = verificationTokenRepo.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid token"));
+        
+        if (v.isExpired()) {
+            verificationTokenRepo.delete(v);
+            throw new RuntimeException("Token expired");
+        }
+        
+        User user = v.getUser();
+        user.setVerified(true);
+        userRepo.save(user);
+        verificationTokenRepo.delete(v);
+    }
+
+    public void createPasswordResetTokenAndSendEmail(String email) {
+        Optional<User> opt = userRepo.findByEmail(email);
+        opt.ifPresent(user -> {
+            passwordResetTokenRepo.findByUser(user).ifPresent(passwordResetTokenRepo::delete);
+            PasswordResetToken prt = new PasswordResetToken(user, PASSWORD_RESET_TOKEN_MIN);
+            passwordResetTokenRepo.save(prt);
+            String body = "Reset link: http://localhost:5173/reset-password?token=" + prt.getToken();
+            sendEmailIfPossible(user.getEmail(), "Password Reset", body);
+        });
+    }
+
+    public void resetPassword(String token, String newPassword) {
+        PasswordResetToken prt = passwordResetTokenRepo.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid token"));
+        if (prt.isExpired()) throw new RuntimeException("Token expired");
+        User user = prt.getUser();
+        user.setPassword(encoder.encode(newPassword));
+        userRepo.save(user);
+        passwordResetTokenRepo.delete(prt);
+    }
+
+    public void changePassword(String email, String oldPassword, String newPassword) {
+        User user = userRepo.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        if (!encoder.matches(oldPassword, user.getPassword())) throw new RuntimeException("Old password is incorrect");
+        user.setPassword(encoder.encode(newPassword));
+        userRepo.save(user);
+    }
+
+    public UserDTO login(String email, String password) {
+        User user = userRepo.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        if (!user.isVerified()) throw new RuntimeException("Email not verified.");
+        if (!encoder.matches(password, user.getPassword())) throw new RuntimeException("Invalid credentials");
+
+        String token = jwtUtils.generateTokenFromUsername(user.getEmail());
+        UserDTO response = mapper.map(user, UserDTO.class);
+        response.setPassword(null);
+        response.setToken(token);
+        return response;
+    }
+
+    public List<UserDTO> getAllUsersForAdmin() {
+        return userRepo.findAll().stream()
+                .map(u -> {
+                    UserDTO d = mapper.map(u, UserDTO.class);
+                    d.setPassword(null);
+                    return d;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private void sendEmailIfPossible(String to, String subject, String body) {
+        if (mailSender == null) return;
+        SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setTo(to);
+        msg.setSubject(subject);
+        msg.setText(body);
+        mailSender.send(msg);
+    }
+}

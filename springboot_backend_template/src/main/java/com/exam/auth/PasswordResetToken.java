@@ -20,9 +20,7 @@ import lombok.Setter;
 public class PasswordResetToken {
     @Id
     private String token;
-
-    // FIX: Removed CascadeType.ALL or REMOVE.
-    // This prevents the "User not found" error after creating a reset token.
+   
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

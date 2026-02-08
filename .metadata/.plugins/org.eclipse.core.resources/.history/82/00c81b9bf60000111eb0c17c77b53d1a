@@ -1,0 +1,51 @@
+package com.exam.controller;
+
+import com.exam.dto.PropertyDTO;
+import com.exam.service.PropertyService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/properties")
+@CrossOrigin("*")
+public class PropertyController {
+
+    @Autowired
+    private PropertyService propertyService;
+
+    @GetMapping
+    public List<PropertyDTO> getAllProperties() {
+        return propertyService.getAllProperties();
+    }
+
+    @GetMapping("/my-properties")
+    @PreAuthorize("hasRole('OWNER')")
+    public List<PropertyDTO> getMyProperties(Principal principal) {
+        return propertyService.getPropertiesByOwner(principal.getName());
+    }
+
+    @PostMapping
+    @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
+    public ResponseEntity<PropertyDTO> addProperty(@Valid @RequestBody PropertyDTO propertyDTO, Principal principal) {
+        return ResponseEntity.ok(propertyService.addProperty(propertyDTO, principal.getName()));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
+    public ResponseEntity<PropertyDTO> updateProperty(@PathVariable Long id, @Valid @RequestBody PropertyDTO dto, Principal principal) {
+        return ResponseEntity.ok(propertyService.updateProperty(id, dto, principal.getName()));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
+    public ResponseEntity<?> deleteProperty(@PathVariable Long id, Principal principal) {
+        propertyService.deleteProperty(id, principal.getName());
+        return ResponseEntity.ok("Property deleted successfully");
+    }
+}

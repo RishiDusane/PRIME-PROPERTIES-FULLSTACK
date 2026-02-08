@@ -10,7 +10,7 @@ public class QueryDTO {
     private String subject;
     private String description;
     private String adminResponse;
-    private String status; // Changed to String to match Entity
+    private String status; 
     private LocalDateTime createdAt;
     private Long userId;
     private String userName;

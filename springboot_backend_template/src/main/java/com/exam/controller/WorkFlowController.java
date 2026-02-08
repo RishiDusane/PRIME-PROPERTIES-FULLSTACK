@@ -29,10 +29,14 @@ import com.exam.service.PaymentService;
 @RequestMapping("/api")
 @CrossOrigin
 public class WorkFlowController {
-    @Autowired private AppointmentService apptService;
-    @Autowired private BookingService bookingService;
-    @Autowired private PaymentService paymentService;
-    @Autowired private ModelMapper mapper;
+    @Autowired
+    private AppointmentService apptService;
+    @Autowired
+    private BookingService bookingService;
+    @Autowired
+    private PaymentService paymentService;
+    @Autowired
+    private ModelMapper mapper;
 
     @PostMapping("/appointments")
     public ResponseEntity<AppointmentDTO> createAppointment(@RequestBody AppointmentDTO dto, Principal principal) {
@@ -50,7 +54,7 @@ public class WorkFlowController {
         return apptService.getMyAppointments(principal.getName());
     }
 
-    // --- NEW ENDPOINTS ---
+    // --- ENDPOINTS ---
 
     @GetMapping("/appointments/{id}")
     public ResponseEntity<AppointmentDTO> getAppointmentById(@PathVariable Long id, Principal principal) {
@@ -61,9 +65,9 @@ public class WorkFlowController {
     }
 
     @PutMapping("/appointments/{id}")
-    public ResponseEntity<AppointmentDTO> updateAppointment(@PathVariable Long id, 
-                                                            @RequestBody AppointmentDTO dto, 
-                                                            Principal principal) {
+    public ResponseEntity<AppointmentDTO> updateAppointment(@PathVariable Long id,
+            @RequestBody AppointmentDTO dto,
+            Principal principal) {
         Appointment updated = apptService.updateAppointment(id, dto, principal.getName());
         AppointmentDTO out = mapper.map(updated, AppointmentDTO.class);
         out.setPropertyTitle(updated.getProperty().getTitle());
@@ -91,17 +95,18 @@ public class WorkFlowController {
     }
 
     @PostMapping("/payments")
-    public ResponseEntity<Map<String, Object>> processPayment(@RequestBody Map<String, Long> body, Principal principal) {
+    public ResponseEntity<Map<String, Object>> processPayment(@RequestBody Map<String, Long> body,
+            Principal principal) {
         Long bookingId = body.get("bookingId");
         if (bookingId == null) {
             return ResponseEntity.badRequest().build();
         }
         Payment payment = paymentService.processMockPayment(bookingId, principal.getName());
         return ResponseEntity.ok(Map.of(
-            "success", true,
-            "transactionId", payment.getTransactionId(),
-            "amount", payment.getAmount(),
-            "message", "Payment successful (mock)"
-        ));
+                "success", true,
+                "paymentId", payment.getId(),
+                "transactionId", payment.getTransactionId(),
+                "amount", payment.getAmount(),
+                "message", "Payment successful (mock)"));
     }
 }

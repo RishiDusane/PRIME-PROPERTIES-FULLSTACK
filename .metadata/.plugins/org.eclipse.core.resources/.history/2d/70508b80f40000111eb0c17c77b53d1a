@@ -1,0 +1,84 @@
+package com.exam.service;
+
+import com.exam.dto.PropertyDTO;
+import com.exam.entity.Property;
+import com.exam.entity.Role;
+import com.exam.entity.User;
+import com.exam.exception.ResourceNotFoundException;
+import com.exam.repository.PropertyRepository;
+import com.exam.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class PropertyService {
+
+    @Autowired
+    private PropertyRepository propertyRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    public List<PropertyDTO> getAllProperties() {
+        return propertyRepository.findAll().stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+
+    public List<PropertyDTO> getPropertiesByOwner(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return propertyRepository.findByOwner(user).stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+
+    public PropertyDTO addProperty(PropertyDTO dto, String ownerEmail) {
+        User owner = userRepository.findByEmail(ownerEmail).orElseThrow(() -> new ResourceNotFoundException("Owner not found"));
+        Property property = new Property();
+        mapToEntity(dto, property);
+        property.setOwner(owner);
+        return mapToDTO(propertyRepository.save(property));
+    }
+
+    public PropertyDTO updateProperty(Long id, PropertyDTO dto, String userEmail) {
+        Property property = propertyRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Property not found"));
+        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (!user.getRole().equals(Role.ADMIN) && !property.getOwner().getEmail().equals(userEmail)) {
+            throw new RuntimeException("Unauthorized to update this property");
+        }
+
+        mapToEntity(dto, property);
+        return mapToDTO(propertyRepository.save(property));
+    }
+
+    public void deleteProperty(Long id, String userEmail) {
+        Property property = propertyRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Property not found"));
+        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (!user.getRole().equals(Role.ADMIN) && !property.getOwner().getEmail().equals(userEmail)) {
+            throw new RuntimeException("Unauthorized to delete this property");
+        }
+        propertyRepository.delete(property);
+    }
+
+    private void mapToEntity(PropertyDTO dto, Property property) {
+        property.setTitle(dto.getTitle());
+        property.setDescription(dto.getDescription());
+        property.setPrice(dto.getPrice());
+        property.setLocation(dto.getLocation());
+        property.setImageUrl(dto.getImageUrl());
+        property.setAvailable(dto.isAvailable());
+    }
+
+    private PropertyDTO mapToDTO(Property property) {
+        PropertyDTO dto = new PropertyDTO();
+        dto.setId(property.getId());
+        dto.setTitle(property.getTitle());
+        dto.setDescription(property.getDescription());
+        dto.setPrice(property.getPrice());
+        dto.setLocation(property.getLocation());
+        dto.setImageUrl(property.getImageUrl());
+        dto.setAvailable(property.isAvailable());
+        dto.setOwnerId(property.getOwner().getId());
+        return dto;
+    }
+}

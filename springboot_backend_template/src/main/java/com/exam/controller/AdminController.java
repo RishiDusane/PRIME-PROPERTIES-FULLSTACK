@@ -16,23 +16,36 @@ import com.exam.repository.PropertyRepository;
 import com.exam.repository.UserRepository;
 import com.exam.service.UserService;
 
+import com.exam.repository.BookingRepository;
+import com.exam.repository.PaymentRepository;
+
 @RestController
 @RequestMapping("/api/admin")
 @CrossOrigin(origins = "http://localhost:5173")
 public class AdminController {
 
-    @Autowired private UserRepository userRepo;
-    @Autowired private PropertyRepository propertyRepo;
-    @Autowired private AppointmentRepository apptRepo;
-    @Autowired private UserService userService;
+    @Autowired
+    private UserRepository userRepo;
+    @Autowired
+    private PropertyRepository propertyRepo;
+    @Autowired
+    private AppointmentRepository apptRepo;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private PaymentRepository paymentRepo;
+    @Autowired
+    private BookingRepository bookingRepo;
 
     @GetMapping("/stats")
-    public Map<String, Long> stats() {
+    public Map<String, Object> stats() {
+        Double revenue = paymentRepo.calculateTotalRevenue();
         return Map.of(
-            "users", userRepo.count(),
-            "properties", propertyRepo.count(),
-            "appointments", apptRepo.count()
-        );
+                "users", userRepo.count(),
+                "properties", propertyRepo.count(),
+                "appointments", apptRepo.count(),
+                "bookings", bookingRepo.count(),
+                "revenue", revenue != null ? revenue : 0.0);
     }
 
     @GetMapping("/users")

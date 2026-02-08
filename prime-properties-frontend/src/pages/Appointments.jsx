@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import api from "../services/api";
 import toast from "react-hot-toast";
 
+import BookingTimeline from "../components/BookingTimeline";
+
 export default function Appointments() {
   const [appointments, setAppointments] = useState([]);
   const [bookings, setBookings] = useState([]);
@@ -14,7 +16,7 @@ export default function Appointments() {
     if (userStr) {
       try {
         setUser(JSON.parse(userStr));
-      } catch {}
+      } catch { }
     }
     fetchAppointments();
     fetchBookings();
@@ -43,20 +45,63 @@ export default function Appointments() {
   const hasBookingForAppointment = (appointmentId) =>
     bookings.some((b) => b.appointmentId === appointmentId);
 
+  const getBookingForAppointment = (appointmentId) => bookings.find((b) => b.appointmentId === appointmentId);
+
   const handlePay = async (appointmentId) => {
+    if (payingId) return; // Prevent double clicks
     setPayingId(appointmentId);
     try {
+      // 1. Create Booking
       const bookRes = await api.post("/bookings", { appointmentId });
       const bookingId = bookRes.data.id;
-      await api.post("/payments", { bookingId });
-      toast.success("Payment successful!");
-      fetchBookings();
+
+      // 2. Process Payment with explicit method
+      await api.post("/payments", {
+        bookingId,
+        paymentMethod: "CARD"
+      });
+
+      toast.success("Payment successful! Receipt available.");
+      fetchBookings(); // Refresh bookings to show receipt button
       fetchAppointments();
     } catch (err) {
-      const msg = err?.response?.data?.message || err?.response?.data;
-      toast.error(typeof msg === "string" ? msg : "Payment failed");
+      console.error("Payment error:", err);
+      let msg = "Payment failed. Please try again.";
+
+      if (err.response) {
+        // Use backend error message if available
+        if (err.response.data && typeof err.response.data === 'string') {
+          msg = err.response.data;
+        } else if (err.response.data && err.response.data.message) {
+          msg = err.response.data.message;
+        }
+
+        if (err.response.status === 500) {
+          msg = "Server error processing payment. Support notified.";
+        }
+      }
+      toast.error(msg);
     } finally {
       setPayingId(null);
+    }
+  };
+
+  const handleDownloadReceipt = async (paymentId) => {
+    try {
+      const res = await api.get(`/payments/${paymentId}/receipt/pdf`, { responseType: "blob" });
+      const blob = new Blob([res.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      // Ideally the backend header sets the filename, but we can default
+      link.download = `payment-${paymentId}-receipt.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to download PDF receipt");
     }
   };
 
@@ -108,7 +153,7 @@ export default function Appointments() {
                   <th className="px-6 py-4">Customer</th>
                   <th className="px-6 py-4">Date</th>
                   <th className="px-6 py-4">Time</th>
-                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4">Status & Timeline</th>
                   {user?.role === "CUSTOMER" && <th className="px-6 py-4">Payment</th>}
                   {user?.role !== "CUSTOMER" && <th className="px-6 py-4">Actions</th>}
                 </tr>
@@ -134,37 +179,43 @@ export default function Appointments() {
                     </td>
 
                     <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wide
-                          ${
-                            a.status === "APPROVED"
-                              ? "bg-emerald-100 text-emerald-700"
-                              : a.status === "PENDING"
-                              ? "bg-amber-100 text-amber-700"
-                              : "bg-red-100 text-red-700"
-                          }`}
-                      >
-                        {a.status}
-                      </span>
+                      <BookingTimeline appointment={a} booking={getBookingForAppointment(a.id)} />
                     </td>
 
                     {/* CUSTOMER PAYMENT */}
                     {user?.role === "CUSTOMER" && (
                       <td className="px-6 py-4">
-                        {a.status === "APPROVED" &&
-                          (hasBookingForAppointment(a.id) ? (
-                            <span className="inline-flex px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
-                              Paid
-                            </span>
-                          ) : (
-                            <button
-                              onClick={() => handlePay(a.id)}
-                              disabled={payingId === a.id}
-                              className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl transition disabled:opacity-60"
-                            >
-                              {payingId === a.id ? "Processing..." : "Pay"}
-                            </button>
-                          ))}
+                        {a.status === "APPROVED" && (
+                          (() => {
+                            const b = getBookingForAppointment(a.id);
+                            if (b) {
+                              return (
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-flex px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
+                                    Paid
+                                  </span>
+                                  {b.paymentId && (
+                                    <button
+                                      onClick={() => handleDownloadReceipt(b.paymentId)}
+                                      className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-3 py-1.5 rounded-lg transition"
+                                    >
+                                      Download Payment Slip
+                                    </button>
+                                  )}
+                                </div>
+                              );
+                            }
+                            return (
+                              <button
+                                onClick={() => handlePay(a.id)}
+                                disabled={payingId === a.id}
+                                className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl transition disabled:opacity-60"
+                              >
+                                {payingId === a.id ? "Processing..." : "Pay"}
+                              </button>
+                            );
+                          })()
+                        )}
                       </td>
                     )}
 

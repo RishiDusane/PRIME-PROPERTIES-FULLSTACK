@@ -12,10 +12,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.exam.dto.QueryDTO;
 import com.exam.dto.QueryRequest;
 import com.exam.entity.Query;
+import com.exam.entity.QueryStatus;
 import com.exam.entity.User;
 import com.exam.exception.ResourceNotFoundException;
 import com.exam.repository.QueryRepository;
 import com.exam.repository.UserRepository;
+
+
 
 @Service
 @Transactional
@@ -33,7 +36,7 @@ public class QueryService {
         query.setSubject(request.getSubject());
         query.setDescription(request.getDescription());
         query.setUser(user);
-        query.setStatus("PENDING"); // Fixed: Changed from Enum to String literal
+        query.setStatus(QueryStatus.PENDING); 
         query.setCreatedAt(LocalDateTime.now());
 
         return convertToDto(queryRepository.save(query));
@@ -57,10 +60,15 @@ public class QueryService {
         Query query = queryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Query not found"));
         query.setAdminResponse(dto.getAdminResponse() != null ? dto.getAdminResponse() : query.getAdminResponse());
-        if (dto.getStatus() != null && (dto.getStatus().equals("RESOLVED") || dto.getStatus().equals("IN_PROGRESS"))) {
-            query.setStatus(dto.getStatus());
+        
+        if (dto.getStatus() != null) {
+            try {
+                query.setStatus(QueryStatus.valueOf(dto.getStatus()));
+            } catch (IllegalArgumentException e) {
+                query.setStatus(QueryStatus.RESOLVED);
+            }
         } else {
-            query.setStatus("RESOLVED");
+            query.setStatus(QueryStatus.RESOLVED);
         }
         return convertToDto(queryRepository.save(query));
     }

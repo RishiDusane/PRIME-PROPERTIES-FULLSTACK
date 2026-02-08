@@ -1,0 +1,1 @@
+package com.exam.entity; public enum PaymentMethod { CARD, UPI, NETBANKING }

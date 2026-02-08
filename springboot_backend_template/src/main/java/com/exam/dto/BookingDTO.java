@@ -11,5 +11,6 @@ public class BookingDTO {
     private LocalDate bookingDate;
     private double amount;
     private String status; // PENDING, CONFIRMED
-    private String propertyTitle; // for UI
+    private String propertyTitle; 
+    private Long paymentId;
 }

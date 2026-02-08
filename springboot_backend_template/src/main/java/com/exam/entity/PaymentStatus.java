@@ -1,0 +1,1 @@
+package com.exam.entity; public enum PaymentStatus { SUCCESS, FAILED }

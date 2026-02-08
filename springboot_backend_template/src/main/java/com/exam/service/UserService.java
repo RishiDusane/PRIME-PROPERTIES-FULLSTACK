@@ -19,10 +19,13 @@ import com.exam.auth.PasswordResetTokenRepository;
 import com.exam.auth.VerificationToken;
 import com.exam.auth.VerificationTokenRepository;
 import com.exam.dto.UserDTO;
+import com.exam.entity.Role;
 import com.exam.entity.User;
 import com.exam.exception.ResourceNotFoundException;
 import com.exam.repository.UserRepository;
 import com.exam.security.JwtUtils;
+
+
 
 @Service
 @Transactional
@@ -45,76 +48,57 @@ public class UserService {
         if (userRepo.findByEmail(dto.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
-        if (dto.getRole() == User.Role.ADMIN) {
+        if (dto.getRole() == Role.ADMIN) {
             throw new RuntimeException("Admin role cannot be self-assigned");
         }
         User user = mapper.map(dto, User.class);
         user.setPassword(encoder.encode(dto.getPassword()));
         user.setVerified(false); 
         userRepo.save(user);
-        log.info("Registered new user: {}", user.getEmail());
 
         VerificationToken vtoken = new VerificationToken(user, VERIFICATION_TOKEN_MIN);
         verificationTokenRepo.save(vtoken);
 
         String verifyLink = "http://localhost:5173/verify?token=" + vtoken.getToken();
-        String body = "Welcome to PrimeProperties!\n\nPlease verify your email by clicking the link below:\n" + verifyLink;
+        String body = "Welcome! Please verify your email:\n" + verifyLink;
         try {
-            sendEmailIfPossible(user.getEmail(), "Verify your email - PrimeProperties", body);
+            sendEmailIfPossible(user.getEmail(), "Verify your email", body);
         } catch (Exception e) {
-            log.warn("Failed to send verification email: {}", e.getMessage());
+            log.warn("Failed to send verification email");
         }
         return "User registered. Verification email sent.";
     }
 
     public void verifyUser(String token) {
-        if (token == null || token.isBlank()) throw new IllegalArgumentException("Token is required");
         VerificationToken v = verificationTokenRepo.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid verification token"));
+                .orElseThrow(() -> new RuntimeException("Invalid token"));
         
         if (v.isExpired()) {
             verificationTokenRepo.delete(v);
-            throw new RuntimeException("Verification token expired");
+            throw new RuntimeException("Token expired");
         }
         
         User user = v.getUser();
         user.setVerified(true);
         userRepo.save(user);
-        
-        // Delete token only after the user is successfully marked as verified
         verificationTokenRepo.delete(v);
-        log.info("User {} successfully verified", user.getEmail());
     }
 
     public void createPasswordResetTokenAndSendEmail(String email) {
-        if (email == null || email.isBlank()) throw new IllegalArgumentException("Email is required");
         Optional<User> opt = userRepo.findByEmail(email);
         opt.ifPresent(user -> {
-            passwordResetTokenRepo.findByUser(user).ifPresent(existingToken -> {
-                passwordResetTokenRepo.delete(existingToken);
-                passwordResetTokenRepo.flush(); 
-            });
-
+            passwordResetTokenRepo.findByUser(user).ifPresent(passwordResetTokenRepo::delete);
             PasswordResetToken prt = new PasswordResetToken(user, PASSWORD_RESET_TOKEN_MIN);
             passwordResetTokenRepo.save(prt);
-            
-            String resetLink = "http://localhost:5173/reset-password?token=" + prt.getToken();
-            String body = "You requested a password reset. Click link:\n" + resetLink;
-            try {
-                sendEmailIfPossible(user.getEmail(), "Password Reset - PrimeProperties", body);
-            } catch (Exception e) {
-                log.error("Failed to send reset email: ", e);
-            }
+            String body = "Reset link: http://localhost:5173/reset-password?token=" + prt.getToken();
+            sendEmailIfPossible(user.getEmail(), "Password Reset", body);
         });
     }
 
     public void resetPassword(String token, String newPassword) {
         PasswordResetToken prt = passwordResetTokenRepo.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid password reset token"));
-        if (prt.isExpired()) {
-            passwordResetTokenRepo.delete(prt);
-            throw new RuntimeException("Password reset token expired");
-        }
+                .orElseThrow(() -> new RuntimeException("Invalid token"));
+        if (prt.isExpired()) throw new RuntimeException("Token expired");
         User user = prt.getUser();
         user.setPassword(encoder.encode(newPassword));
         userRepo.save(user);
@@ -133,7 +117,6 @@ public class UserService {
         if (!user.isVerified()) throw new RuntimeException("Email not verified.");
         if (!encoder.matches(password, user.getPassword())) throw new RuntimeException("Invalid credentials");
 
-     // Example fix for the incompatible types error
         String token = jwtUtils.generateTokenFromUsername(user.getEmail());
         UserDTO response = mapper.map(user, UserDTO.class);
         response.setPassword(null);

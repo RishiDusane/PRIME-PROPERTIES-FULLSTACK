@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import api from "../services/api";
 import toast from "react-hot-toast";
-import { Users, Home, Calendar, CheckCircle, Clock } from "lucide-react";
+import { Users, Home, Calendar, CheckCircle, Clock, IndianRupee, Layers } from "lucide-react";
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState({ users: 0, properties: 0, appointments: 0 });
+  const [stats, setStats] = useState({ users: 0, properties: 0, bookings: 0, revenue: 0 });
   const [users, setUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
 
@@ -31,10 +31,16 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard label="Total Users" value={stats.users} color="blue" icon={<Users size={24}/>} />
-        <StatCard label="Total Listings" value={stats.properties} color="emerald" icon={<Home size={24}/>} />
-        <StatCard label="Appointments" value={stats.appointments} color="amber" icon={<Calendar size={24}/>} />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard label="Total Users" value={stats.users} color="blue" icon={<Users size={24} />} />
+        <StatCard label="Total Listings" value={stats.properties} color="emerald" icon={<Home size={24} />} />
+        <StatCard label="Total Bookings" value={stats.bookings} color="purple" icon={<Layers size={24} />} />
+        <StatCard
+          label="Total Revenue"
+          value={`₹${stats.revenue ? stats.revenue.toLocaleString('en-IN') : '0'}`} // Assuming backend sends revenue
+          color="amber"
+          icon={<IndianRupee size={24} />}
+        />
       </div>
 
       {/* Users Table */}
@@ -63,16 +69,15 @@ export default function AdminDashboard() {
                       <div className="text-sm text-slate-500">{u.email}</div>
                     </td>
                     <td className="px-8 py-5">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                        u.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
-                      }`}>
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${u.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                        }`}>
                         {u.role}
                       </span>
                     </td>
                     <td className="px-8 py-5">
-                      {u.verified ? 
-                        <span className="flex items-center text-emerald-600 text-sm font-bold"><CheckCircle size={16} className="mr-1.5"/> Verified</span> : 
-                        <span className="flex items-center text-slate-400 text-sm font-bold italic"><Clock size={16} className="mr-1.5"/> Pending</span>
+                      {u.verified ?
+                        <span className="flex items-center text-emerald-600 text-sm font-bold"><CheckCircle size={16} className="mr-1.5" /> Verified</span> :
+                        <span className="flex items-center text-slate-400 text-sm font-bold italic"><Clock size={16} className="mr-1.5" /> Pending</span>
                       }
                     </td>
                   </tr>
@@ -90,14 +95,15 @@ function StatCard({ label, value, color, icon }) {
   const colors = {
     blue: "bg-blue-50 text-blue-600 border-blue-100",
     emerald: "bg-emerald-50 text-emerald-600 border-emerald-100",
-    amber: "bg-amber-50 text-amber-600 border-amber-100"
+    amber: "bg-amber-50 text-amber-600 border-amber-100",
+    purple: "bg-purple-50 text-purple-600 border-purple-100"
   };
   return (
     <div className={`p-8 rounded-3xl border-2 flex items-center space-x-6 bg-white transition hover:shadow-xl duration-300`}>
       <div className={`p-4 rounded-2xl ${colors[color]}`}>{icon}</div>
       <div>
-        <div className="text-3xl font-black text-slate-900">{value}</div>
-        <div className="text-sm text-slate-500 font-bold uppercase tracking-widest">{label}</div>
+        <div className="text-2xl font-black text-slate-900 truncate">{value}</div>
+        <div className="text-xs text-slate-500 font-bold uppercase tracking-widest">{label}</div>
       </div>
     </div>
   );

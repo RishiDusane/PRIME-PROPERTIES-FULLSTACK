@@ -24,13 +24,13 @@ public class AppointmentDTO {
         regexp = "PENDING|APPROVED|REJECTED",
         message = "Status must be PENDING, APPROVED, or REJECTED"
     )
-    private String status; // Optional on create; required on update
+    private String status; 
 
     @NotNull(message = "Property ID is required")
     private Long propertyId;
 
-    private Long customerId; // Set server-side from principal on create
+    private Long customerId; 
 
-    private String propertyTitle; // For UI only
-    private String customerName; // For UI only
+    private String propertyTitle; 
+    private String customerName; 
 }

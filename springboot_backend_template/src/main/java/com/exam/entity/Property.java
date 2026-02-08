@@ -1,24 +1,14 @@
 package com.exam.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Table(name = "properties")
-@Getter @Setter
+@Getter
+@Setter
 public class Property {
 
     @Id
@@ -30,31 +20,29 @@ public class Property {
     private String title;
 
     @NotBlank(message = "Description is required")
+    @Column(length = 1000)
     @Size(min = 10, max = 1000, message = "Description must be between 10 and 1000 characters")
     private String description;
 
     @Positive(message = "Price must be a positive value")
-    @Max(value = 1000000000, message = "Price is too large")
     private double price;
 
     @NotBlank(message = "Location cannot be empty")
-    @Size(max = 255, message = "Location cannot exceed 255 characters")
     private String location;
 
     @NotBlank(message = "Image URL is required")
-    @Size(max = 500, message = "Image URL is too long")
-    @Pattern(
-        regexp = "^(http|https)://.*$",
-        message = "Image URL must start with http:// or https://"
-    )
+    @Pattern(regexp = "^(http|https)://.*$", message = "Image URL must start with http:// or https://")
     private String imageUrl;
 
-    // Many Properties can belong to One Owner
+    private boolean available = true;
+
+    private boolean deleted = false;
+
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
     @NotNull(message = "Owner cannot be null")
     private User owner;
-}
 
-// Tables 13/12/2025 
-// 
+    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<Appointment> appointments = new java.util.ArrayList<>();
+}

@@ -8,12 +8,17 @@ import org.springframework.stereotype.Service;
 
 import com.exam.dto.BookingDTO;
 import com.exam.entity.Appointment;
+import com.exam.entity.AppointmentStatus;
 import com.exam.entity.Booking;
+import com.exam.entity.BookingStatus;
 import com.exam.entity.User;
 import com.exam.exception.ResourceNotFoundException;
 import com.exam.repository.AppointmentRepository;
 import com.exam.repository.BookingRepository;
 import com.exam.repository.UserRepository;
+import com.exam.repository.PaymentRepository;
+
+
 
 @Service
 public class BookingService {
@@ -21,12 +26,14 @@ public class BookingService {
     @Autowired private BookingRepository bookingRepo;
     @Autowired private AppointmentRepository apptRepo;
     @Autowired private UserRepository userRepo;
+    @Autowired private PaymentRepository paymentRepo;
 
     public BookingDTO createBooking(Long appointmentId, String customerEmail) {
         User customer = userRepo.findByEmail(customerEmail).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         Appointment appt = apptRepo.findById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
-        if (!appt.getStatus().equals(Appointment.Status.APPROVED)) {
+        
+        if (!appt.getStatus().equals(AppointmentStatus.APPROVED)) {
             throw new RuntimeException("Only approved appointments can be converted to bookings");
         }
         if (!appt.getCustomer().getId().equals(customer.getId())) {
@@ -35,11 +42,12 @@ public class BookingService {
         if (bookingRepo.findByAppointment_Id(appointmentId).isPresent()) {
             throw new RuntimeException("A booking already exists for this appointment");
         }
+        
         Booking booking = new Booking();
         booking.setAppointment(appt);
         booking.setBookingDate(appt.getDate());
-        booking.setAmount(appt.getProperty().getPrice() * 0.1); // 10% advance or mock amount
-        booking.setStatus(Booking.BookingStatus.PENDING);
+        booking.setAmount(appt.getProperty().getPrice() * 0.1); 
+        booking.setStatus(BookingStatus.PENDING);
         booking = bookingRepo.save(booking);
         return toDTO(booking);
     }
@@ -59,6 +67,8 @@ public class BookingService {
         dto.setAmount(b.getAmount());
         dto.setStatus(b.getStatus().name());
         dto.setPropertyTitle(b.getAppointment().getProperty().getTitle());
+        // set paymentId if exists
+        paymentRepo.findByBooking_Id(b.getId()).ifPresent(p -> dto.setPaymentId(p.getId()));
         return dto;
     }
 }

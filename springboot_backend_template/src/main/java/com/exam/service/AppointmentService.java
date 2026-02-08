@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 
 import com.exam.dto.AppointmentDTO;
 import com.exam.entity.Appointment;
+import com.exam.entity.AppointmentStatus;
 import com.exam.entity.Property;
+import com.exam.entity.Role;
 import com.exam.entity.User;
 import com.exam.exception.ResourceNotFoundException;
 import com.exam.repository.AppointmentRepository;
@@ -18,10 +20,16 @@ import com.exam.repository.UserRepository;
 
 @Service
 public class AppointmentService {
-    @Autowired private AppointmentRepository apptRepo;
-    @Autowired private PropertyRepository propRepo;
-    @Autowired private UserRepository userRepo;
-    @Autowired private ModelMapper mapper;
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AppointmentService.class);
+
+    @Autowired
+    private AppointmentRepository apptRepo;
+    @Autowired
+    private PropertyRepository propRepo;
+    @Autowired
+    private UserRepository userRepo;
+    @Autowired
+    private ModelMapper mapper;
 
     public Appointment createAppointment(AppointmentDTO dto, String customerEmail) {
         User customer = userRepo.findByEmail(customerEmail).orElseThrow();
@@ -29,13 +37,13 @@ public class AppointmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Property not found"));
 
         if (apptRepo.findByProperty_IdAndDateAndTime(property.getId(), dto.getDate(), dto.getTime()).isPresent()) {
-            throw new RuntimeException("This time slot is already booked for the selected property. Please choose another date or time.");
+            throw new RuntimeException("This time slot is already booked for the selected property.");
         }
 
         Appointment appt = new Appointment();
         appt.setDate(dto.getDate());
         appt.setTime(dto.getTime());
-        appt.setStatus(Appointment.Status.PENDING);
+        appt.setStatus(AppointmentStatus.PENDING);
         appt.setCustomer(customer);
         appt.setProperty(property);
         return apptRepo.save(appt);
@@ -44,9 +52,9 @@ public class AppointmentService {
     public List<AppointmentDTO> getMyAppointments(String email) {
         User user = userRepo.findByEmail(email).orElseThrow();
         List<Appointment> list;
-        if (user.getRole() == User.Role.ADMIN) {
+        if (user.getRole() == Role.ADMIN) {
             list = apptRepo.findAll();
-        } else if (user.getRole() == User.Role.OWNER) {
+        } else if (user.getRole() == Role.OWNER) {
             list = apptRepo.findByProperty_Owner_Id(user.getId());
         } else {
             list = apptRepo.findByCustomer_Id(user.getId());
@@ -54,45 +62,47 @@ public class AppointmentService {
         return list.stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
-    // --- NEW CRUD METHODS ---
-
     public Appointment getAppointmentById(Long id, String email) {
         Appointment appt = apptRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
-        
+
         User user = userRepo.findByEmail(email).orElseThrow();
-        
-        // Security: Allow access only if user is the Customer OR the Property Owner
+
         boolean isCustomer = appt.getCustomer().getId().equals(user.getId());
         boolean isOwner = appt.getProperty().getOwner().getId().equals(user.getId());
-        
-        if (!isCustomer && !isOwner && user.getRole() != User.Role.ADMIN) {
+
+        if (!isCustomer && !isOwner && user.getRole() != Role.ADMIN) {
             throw new RuntimeException("Unauthorized access to this appointment");
         }
         return appt;
     }
 
     public Appointment updateAppointment(Long id, AppointmentDTO dto, String email) {
-        Appointment appt = getAppointmentById(id, email); // performs security check
-        
-        // Update allowable fields
-        if (dto.getDate() != null) appt.setDate(dto.getDate());
-        if (dto.getTime() != null) appt.setTime(dto.getTime());
-        
-        // Update Status
+        Appointment appt = getAppointmentById(id, email);
+
+        if (dto.getDate() != null)
+            appt.setDate(dto.getDate());
+        if (dto.getTime() != null)
+            appt.setTime(dto.getTime());
+
         if (dto.getStatus() != null) {
             try {
-                appt.setStatus(Appointment.Status.valueOf(dto.getStatus()));
+                AppointmentStatus newStatus = AppointmentStatus.valueOf(dto.getStatus());
+                if (newStatus == AppointmentStatus.APPROVED && appt.getStatus() != AppointmentStatus.APPROVED) {
+                    logger.info("Email sent to {} - Appointment for {} approved.", appt.getCustomer().getEmail(),
+                            appt.getProperty().getTitle());
+                }
+                appt.setStatus(newStatus);
             } catch (IllegalArgumentException e) {
-                // Ignore invalid status or throw exception
+                // Handle invalid status
             }
         }
-        
+
         return apptRepo.save(appt);
     }
 
     public void deleteAppointment(Long id, String email) {
-        Appointment appt = getAppointmentById(id, email); // performs security check
+        Appointment appt = getAppointmentById(id, email);
         apptRepo.delete(appt);
     }
 
