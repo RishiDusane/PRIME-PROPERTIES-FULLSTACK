@@ -1,75 +1,201 @@
-# Prime Properties
+Prime Properties
 
-Prime Properties is a full-stack real estate management application built with **Spring Boot** (Backend) and **React** (Frontend). It facilitates property browsing, appointment booking, secure payments, and property management for verified owners.
+Prime Properties is a full-stack real estate management application built with Spring Boot (Backend) and React (Frontend). It enables users to browse properties, schedule appointments, make secure payments, and manage listings through a role-based system designed with real-world application architecture.
 
----
+🎯 Why This Project
 
-## 🎯 Why This Project
-This project solves the challenge of managing real estate transactions securely and reliably. It enforces strict data integrity constraints—preventing the deletion of active bookings—and provides professional, automated financial documentation via PDF receipts, ensuring a production-grade experience for both property owners and customers.
+Real estate platforms require secure transaction handling, controlled access, and reliable data management. This project addresses those challenges by implementing:
 
----
+Secure authentication and authorization using JWT.
 
-## 🚀 Features
+Strict data integrity rules to prevent accidental loss of active booking data.
 
-### Core Functionality
-- **User Roles**:
-  - **Customer**: Browse properties, book appointments, pay for bookings, download receipts.
-  - **Owner**: Publish properties, view appointments, manage property availability.
-  - **Admin**: System oversight and user management.
-- **Authentication**: Secure JWT-based login and role-based access control.
+Automated generation of professional payment receipts.
 
-### New Features (Version 2.0)
-- **📄 PDF Payment Receipts**
-  - Automatically generates professional PDF receipts after payment.
-  - Accessible via "Download Receipt" in the *My Appointments* section.
+A scalable layered backend architecture suitable for production-grade applications.
 
-- **🗑️ Safe Property Deletion**
-  - Owners can delete their properties.
-  - Deletion is blocked if the property has active (future) appointments or confirmed bookings to ensure data integrity.
+The system ensures a smooth and secure experience for both property owners and customers.
 
----
+🚀 Features
+Core Functionality
 
-## 🛠 Tech Stack
+User Roles
 
-### Backend
-- **Framework**: Spring Boot 3.2
-- **Language**: Java 17
-- **Database**: MySQL
-- **Security**: Spring Security + JWT
-- **PDF Generation**: OpenPDF (LibrePDF)
-- **Build Tool**: Maven
+Customer
 
-### Frontend
-- **Framework**: React (Vite)
-- **Styling**: Tailwind CSS
-- **Routing**: React Router
-- **HTTP Client**: Axios
+Browse available properties
 
----
+Book appointments
 
-## 🏗 Authorization & Roles
+Make payments
 
-| Role | Permissions |
-| :--- | :--- |
-| **GUEST** | View properties, Register, Login |
-| **CUSTOMER** | Book appointments, Make payments, Download receipts |
-| **OWNER** | Add/Edit Properties, Delete Properties (if safe), View Requests |
-| **ADMIN** | Manage Users, View System Stats, Full Access |
+Download payment receipts
 
----
+Owner
 
-## 🏃‍♂️ Getting Started
+Add and manage property listings
 
-### Prerequisites
-- Java 17+
-- Node.js 18+
-- MySQL Server
+View booking requests
 
----
+Manage availability
 
-### 1. Database Setup
+Admin
 
-Create a MySQL database named `prime_db`:
+Manage users
 
-```sql
+Monitor system activity
+
+Authentication & Security
+
+JWT-based authentication
+
+Role-based access control
+
+Secure API endpoints using Spring Security
+
+⭐ New Features (Version 2.0)
+📄 PDF Payment Receipts
+
+Automatically generates professional PDF receipts after successful payment.
+
+Users can download receipts from the My Appointments section.
+
+Helps maintain financial transparency and record keeping.
+
+🗑️ Safe Property Deletion
+
+Property owners can delete listings safely.
+
+Deletion is blocked if:
+
+Active future appointments exist
+
+Confirmed bookings are present
+
+Prevents accidental data loss and maintains database consistency.
+
+🛠 Tech Stack
+Backend
+
+Framework: Spring Boot 3.2
+
+Language: Java 17
+
+Database: MySQL
+
+Security: Spring Security + JWT
+
+ORM: Hibernate / Spring Data JPA
+
+PDF Generation: OpenPDF (LibrePDF)
+
+Build Tool: Maven
+
+Frontend
+
+Framework: React (Vite)
+
+Styling: Tailwind CSS
+
+Routing: React Router
+
+HTTP Client: Axios
+
+🏗 Authorization & Roles
+Role	Permissions
+GUEST	View properties, Register, Login
+CUSTOMER	Book appointments, Make payments, Download receipts
+OWNER	Add/Edit Properties, Delete Properties (if safe), View Requests
+ADMIN	Manage Users, View System Stats, Full Access
+🏃‍♂️ Getting Started
+Prerequisites
+
+Java 17+
+
+Node.js 18+
+
+MySQL Server
+
+1️⃣ Database Setup
+
+Create a MySQL database named prime_db:
+
 CREATE DATABASE prime_db;
+
+
+Update database configuration in:
+
+backend/src/main/resources/application.properties
+
+spring.datasource.url=jdbc:mysql://localhost:3306/prime_db
+spring.datasource.username=your_username
+spring.datasource.password=your_password
+
+2️⃣ Backend Setup (Spring Boot)
+cd backend
+mvn clean install
+mvn spring-boot:run
+
+
+Backend runs on:
+
+http://localhost:8080
+
+3️⃣ Frontend Setup (React)
+cd frontend
+npm install
+npm run dev
+
+
+Frontend runs on:
+
+http://localhost:5173
+
+🔐 API Testing
+
+APIs can be tested using:
+
+Postman
+
+Swagger UI
+
+Swagger URL:
+
+http://localhost:8080/swagger-ui.html
+
+📂 Project Architecture
+backend
+ ├── controller
+ ├── service
+ ├── repository
+ ├── entity
+ ├── security
+ └── config
+
+frontend
+ ├── components
+ ├── pages
+ ├── services
+ └── routes
+
+
+The backend follows a layered architecture ensuring separation of concerns and maintainability.
+
+📈 Future Enhancements
+
+Online payment gateway integration
+
+Property image optimization
+
+Email notifications for bookings
+
+Advanced search and filtering
+
+Admin analytics dashboard
+
+👨‍💻 Author
+
+Rishi Dusane
+LinkedIn: https://www.linkedin.com/in/rishidusane/
+
+GitHub: https://github.com/RishiDusane
