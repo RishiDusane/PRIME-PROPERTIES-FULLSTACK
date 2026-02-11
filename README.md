@@ -1,201 +1,158 @@
-Prime Properties
+🏠 Prime Properties – Real Estate Management Web Application
 
-Prime Properties is a full-stack real estate management application built with Spring Boot (Backend) and React (Frontend). It enables users to browse properties, schedule appointments, make secure payments, and manage listings through a role-based system designed with real-world application architecture.
+Prime Properties is a full-stack real estate management web application developed using Spring Boot (backend) and React.js (frontend). The application enables users to browse properties, schedule visits, manage bookings, and perform secure transactions while allowing property owners and administrators to manage listings efficiently.
 
-🎯 Why This Project
-
-Real estate platforms require secure transaction handling, controlled access, and reliable data management. This project addresses those challenges by implementing:
-
-Secure authentication and authorization using JWT.
-
-Strict data integrity rules to prevent accidental loss of active booking data.
-
-Automated generation of professional payment receipts.
-
-A scalable layered backend architecture suitable for production-grade applications.
-
-The system ensures a smooth and secure experience for both property owners and customers.
+This project demonstrates practical implementation of backend development, REST API design, authentication, and full-stack integration following industry-standard software engineering practices.
 
 🚀 Features
-Core Functionality
+👤 User Features
 
-User Roles
+User registration and secure login using JWT authentication
 
-Customer
+Browse available properties with detailed information
 
-Browse available properties
+Book property visits and manage appointments
 
-Book appointments
+Secure booking and payment workflow
 
-Make payments
+View booking history and transaction details
 
-Download payment receipts
+🏢 Owner/Admin Features
 
-Owner
+Add, update, and manage property listings
 
-Add and manage property listings
+Manage bookings and customer requests
 
-View booking requests
+Prevent deletion of properties with active bookings
 
-Manage availability
+Generate automated payment receipts
 
-Admin
+🔐 Security Features
 
-Manage users
+Role-based authentication and authorization
 
-Monitor system activity
+JWT-based session management
 
-Authentication & Security
+Spring Security integration
 
-JWT-based authentication
+Secure REST API endpoints
 
-Role-based access control
-
-Secure API endpoints using Spring Security
-
-⭐ New Features (Version 2.0)
-📄 PDF Payment Receipts
-
-Automatically generates professional PDF receipts after successful payment.
-
-Users can download receipts from the My Appointments section.
-
-Helps maintain financial transparency and record keeping.
-
-🗑️ Safe Property Deletion
-
-Property owners can delete listings safely.
-
-Deletion is blocked if:
-
-Active future appointments exist
-
-Confirmed bookings are present
-
-Prevents accidental data loss and maintains database consistency.
-
-🛠 Tech Stack
+🛠️ Tech Stack
 Backend
 
-Framework: Spring Boot 3.2
+Java
 
-Language: Java 17
+Spring Boot
 
-Database: MySQL
+Spring Security
 
-Security: Spring Security + JWT
+Hibernate / JPA
 
-ORM: Hibernate / Spring Data JPA
+REST APIs
 
-PDF Generation: OpenPDF (LibrePDF)
-
-Build Tool: Maven
+JWT Authentication
 
 Frontend
 
-Framework: React (Vite)
+React.js
 
-Styling: Tailwind CSS
+Axios
 
-Routing: React Router
+HTML5
 
-HTTP Client: Axios
+CSS3
 
-🏗 Authorization & Roles
-Role	Permissions
-GUEST	View properties, Register, Login
-CUSTOMER	Book appointments, Make payments, Download receipts
-OWNER	Add/Edit Properties, Delete Properties (if safe), View Requests
-ADMIN	Manage Users, View System Stats, Full Access
-🏃‍♂️ Getting Started
+JavaScript
+
+Database
+
+MySQL
+
+Tools & Technologies
+
+Maven
+
+Postman (API Testing)
+
+Git & GitHub
+
+🏗️ System Architecture
+
+The application follows a layered architecture:
+
+Controller → Service → Repository → Database
+
+
+Controller Layer: Handles API requests and responses
+
+Service Layer: Business logic implementation
+
+Repository Layer: Database interaction using JPA
+
+Database Layer: MySQL relational database
+
+🎯 Project Objectives
+
+Build a scalable real-world full-stack application
+
+Implement secure authentication using JWT
+
+Apply backend best practices using Spring Boot
+
+Ensure data integrity and reliable transaction handling
+
+Demonstrate full-stack development skills for enterprise applications
+
+📸 API Testing
+
+All APIs were tested using Postman, including:
+
+Authentication APIs
+
+Property management APIs
+
+Booking APIs
+
+Payment workflows
+
+Validation and error handling scenarios
+
+⚙️ Installation & Setup
 Prerequisites
 
 Java 17+
 
-Node.js 18+
+Node.js
 
-MySQL Server
+MySQL
 
-1️⃣ Database Setup
+Maven
 
-Create a MySQL database named prime_db:
-
-CREATE DATABASE prime_db;
-
-
-Update database configuration in:
-
-backend/src/main/resources/application.properties
-
-spring.datasource.url=jdbc:mysql://localhost:3306/prime_db
-spring.datasource.username=your_username
-spring.datasource.password=your_password
-
-2️⃣ Backend Setup (Spring Boot)
+Backend Setup
+git clone https://github.com/your-username/prime-properties.git
 cd backend
 mvn clean install
 mvn spring-boot:run
 
-
-Backend runs on:
-
-http://localhost:8080
-
-3️⃣ Frontend Setup (React)
+Frontend Setup
 cd frontend
 npm install
-npm run dev
+npm start
 
-
-Frontend runs on:
-
-http://localhost:5173
-
-🔐 API Testing
-
-APIs can be tested using:
-
-Postman
-
-Swagger UI
-
-Swagger URL:
-
-http://localhost:8080/swagger-ui.html
-
-📂 Project Architecture
-backend
- ├── controller
- ├── service
- ├── repository
- ├── entity
- ├── security
- └── config
-
-frontend
- ├── components
- ├── pages
- ├── services
- └── routes
-
-
-The backend follows a layered architecture ensuring separation of concerns and maintainability.
-
-📈 Future Enhancements
+📌 Future Enhancements
 
 Online payment gateway integration
 
-Property image optimization
-
 Email notifications for bookings
+
+Property image upload optimization
 
 Advanced search and filtering
 
-Admin analytics dashboard
+Deployment using Docker & Cloud services
 
 👨‍💻 Author
 
-Rishi Dusane
-LinkedIn: https://www.linkedin.com/in/rishidusane/
-
-GitHub: https://github.com/RishiDusane
+Rishi Dattatray Dusane
+CDAC PG-DAC Graduate | Java Fullstack Developer
+Pune, India
